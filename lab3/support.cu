@@ -37,9 +37,7 @@ void verify(unsigned int* input, unsigned int* bins, unsigned int num_elements, 
   // Compute reference bins
   for(unsigned int i = 0; i < num_elements; ++i) {
       unsigned int binIdx = input[i];
-      if(bins_ref[binIdx] < 255u) {
-          ++bins_ref[binIdx];
-      }
+      ++bins_ref[binIdx];
   }
 
   // Compare to reference bins

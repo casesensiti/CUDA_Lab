@@ -14,26 +14,28 @@
 __global__ void myHisto(unsigned int* input, unsigned int* bins, unsigned int num_elements, 
 	unsigned int num_bins) {
 	__shared__ unsigned int binL[4096]; // support num bins no more than 4096
+
 	int step = 0;
 	while (step < num_bins) {
 		if (step + threadIdx.x < num_bins) binL[step + threadIdx.x] = 0;
-		step += blockIdx.x;
+		step += blockDim.x;
 	}
 	__syncthreads();
 
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	int stride = blockDim.x * gridDim.x;
 	while (i < num_elements) {
-		atomicAdd(binL[input[i]], 1);
+		atomicAdd(&binL[input[i]], 1);
 		i += stride;
 	}
 	__syncthreads();
 
 	step = 0;
 	while (step < num_bins) {
-		if (step + threadIdx.x < num_bins) atomicAdd(bins[step + threadIdx.x], binL[step + threadIdx.x]);
-		step += blockIdx.x;
+		if (step + threadIdx.x < num_bins) atomicAdd(&bins[step + threadIdx.x], binL[step + threadIdx.x]);
+		step += blockDim.x;
 	}
+
 }
 
 /******************************************************************************
@@ -49,8 +51,7 @@ void histogram(unsigned int* input, unsigned int* bins, unsigned int num_element
 	//	  Thus, the numbers a block deals must be levels larger than the size of bins. 
 
     // INSERT CODE HERE
-    int grids = sqrt(num_elements) / 64;
-    if (grids < 1) grids = 1;
+    int grids = sqrt(num_elements) / 64 + 1;
     dim3 dimGrid(grids, 1, 1);
     dim3 dimBlock(512, 1, 1);
     myHisto <<<dimGrid, dimBlock>>> (input, bins, num_elements, num_bins);
