@@ -87,7 +87,7 @@ int main (int argc, char *argv[])
         if (i + SeqSize > VecSize) {
             size0 = VecSize - i;
             size1 = 0;
-        } else if (i + 2 * SeqSize > SeqSize) size1 = VecSize - 2 * SeqSize;
+        } else if (i + 2 * SeqSize > VecSize) size1 = VecSize - i -  SeqSize;
 
         cudaMemcpyAsync(A_d0, A_h + i, size0 * sizeof(float), cudaMemcpyHostToDevice, stream0);
         cudaMemcpyAsync(B_d0, B_h + i, size0 * sizeof(float), cudaMemcpyHostToDevice, stream0);
